@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.csw.dao.ClazzDAO">
+
+
+    <insert id="save" parameterType="clazz">
+        insert into t_clazz values(#{id},#{name},#{tag.id})
+    </insert>
+
+
+    <resultMap type="clazz" id="clazzResultMap">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <!-- 封装标签关系属性 -->
+        <association property="tag" javaType="com.csw.entity.Tag">
+            <id column="tid" property="id"/>
+            <result column="tname" property="name"/>
+        </association>
+        <!-- 封装小组关系属性 -->
+        <collection property="groups" javaType="list" ofType="com.csw.entity.Group">
+            <id column="gid" property="id"/>
+            <result column="gname" property="name"/>
+        </collection>
+    </resultMap>
+
+    <select id="queryAll" resultMap="clazzResultMap">
+        select c.id,c.name,t.id as tid,t.name as tname
+        from t_clazz c
+        left join t_tag t
+        on c.tagId = t.id
+    </select>
+
+
+    <select id="queryAllClazzAndGroups" resultMap="clazzResultMap">
+        select c.id,c.name,g.id as gid,g.name as gname
+        from t_clazz c
+        left join t_group g
+        on c.id = g.clazzId
+    </select>
+
+
+    <select id="queryStudentCountsByClazzId" resultType="Integer">
+        select count(id) from t_student where clazzId = #{clazzId}
+    </select>
+
+
+</mapper>

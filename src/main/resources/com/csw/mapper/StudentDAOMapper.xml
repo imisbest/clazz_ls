@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.csw.dao.StudentDAO">
+
+
+    <resultMap type="student" id="studentResultMap">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="age" property="age"/>
+        <result column="qq" property="qq"/>
+        <result column="phone" property="phone"/>
+        <result column="bir" property="bir"/>
+        <result column="mark" property="mark"/>
+        <!-- 封装班级信息 -->
+        <association property="clazz" javaType="com.csw.entity.Clazz">
+            <id column="cid" property="id"/>
+            <result column="cname" property="name"/>
+        </association>
+        <!-- 封装小组信息 -->
+        <association property="group" javaType="com.csw.entity.Group">
+            <id column="gid" property="id"/>
+            <result column="gname" property="name"/>
+        </association>
+        <!-- 封装城市信息 -->
+        <association property="city" javaType="com.csw.entity.City">
+            <id column="ctid" property="id"/>
+            <result column="ctname" property="name"/>
+        </association>
+        <!-- 封装标签信息 -->
+        <collection property="tags" javaType="list" ofType="com.csw.entity.Tag">
+            <id column="taid" property="id"/>
+            <result column="taname" property="name"/>
+        </collection>
+    </resultMap>
+
+
+    <insert id="save" parameterType="student">
+        insert into t_student values
+        (#{id},#{name},#{age},#{qq},#{phone},#{bir},#{mark},#{clazz.id,jdbcType=VARCHAR},#{group.id,jdbcType=VARCHAR},#{city.id,jdbcType=VARCHAR})
+    </insert>
+
+
+    <select id="queryAll" resultMap="studentResultMap">
+        select s.id,s.name,s.age,s.qq,s.phone,s.bir,s.mark,
+        c.id as cid,c.name as cname,
+        g.id as gid,g.name as gname,
+        ct.id as ctid,ct.name as ctname,
+        ta.id as taid,ta.name as taname
+        from t_student s
+        left join t_clazz c
+        on s.clazzId = c.id
+        left join t_group g
+        on s.groupId = g.id
+        left join t_city ct
+        on s.cityId = ct.id
+        left join t_student_tag st
+        on s.id = st.sid
+        left join t_tag ta
+        on st.tid = ta.id
+    </select>
+
+
+    <select id="queryAllLike" resultMap="studentResultMap">
+        select s.id,s.name,s.age,s.qq,s.phone,s.bir,s.mark,
+        c.id as cid,c.name as cname,
+        g.id as gid,g.name as gname,
+        ct.id as ctid,ct.name as ctname,
+        ta.id as taid,ta.name as taname
+        from t_student s
+        left join t_clazz c
+        on s.clazzId = c.id
+        left join t_group g
+        on s.groupId = g.id
+        left join t_city ct
+        on s.cityId = ct.id
+        left join t_student_tag st
+        on s.id = st.sid
+        left join t_tag ta
+        on st.tid = ta.id
+        <where>
+            <if test="searchKey=='stuName'">
+                s.name like concat('%',#{searchValue},'%')
+            </if>
+            <if test="searchKey=='clazzName'">
+                c.name like concat('%',#{searchValue},'%')
+            </if>
+            <if test="searchKey=='tagName'">
+                ta.name like concat('%',#{searchValue},'%')
+            </if>
+        </where>
+    </select>
+
+
+    <select id="queryOneStudentById" resultMap="studentResultMap">
+        select s.id,s.name,s.age,s.qq,s.phone,s.bir,s.mark,
+        c.id as cid,c.name as cname,
+        g.id as gid,g.name as gname,
+        ct.id as ctid,ct.name as ctname,
+        ta.id as taid,ta.name as taname
+        from t_student s
+        left join t_clazz c
+        on s.clazzId = c.id
+        left join t_group g
+        on s.groupId = g.id
+        left join t_city ct
+        on s.cityId = ct.id
+        left join t_student_tag st
+        on s.id = st.sid
+        left join t_tag ta
+        on st.tid = ta.id
+        where s.id = #{id}
+    </select>
+
+
+    <select id="queryByGroupId" parameterType="string" resultMap="studentResultMap">
+        select
+        s.id,
+        s.name,
+        s.age,
+        s.qq,
+        s.phone,
+        s.bir,
+        s.mark,
+        t.id as taid,
+        t.name taname
+        from
+        t_student s
+        left join t_student_tag st on s.id = st.sid
+        left join t_tag t on st.tid = t.id
+        where
+        s.groupid = #{groupid}
+    </select>
+
+    <update id="update" parameterType="student">
+        update t_student set
+        name=#{name},age=#{age},qq=#{qq},phone=#{phone},bir=#{bir},mark=#{mark},
+        clazzId=#{clazz.id},groupId=#{group.id},cityId=#{city.id}
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="String">
+        delete from t_student where id = #{id}
+    </delete>
+
+
+</mapper>
